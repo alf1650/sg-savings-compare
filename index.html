@@ -11,6 +11,7 @@
     --dbs-color: #D0021B;
     --sc-color: #0072AA;
     --posb-color: #D40000;
+    --hsbc-color: #DB0011;
     --bg: #f5f7fa;
     --card-bg: #fff;
     --text: #2d3748;
@@ -178,6 +179,8 @@
     <button class="tab" data-tab="dbs-multi">DBS Multiplier</button>
     <button class="tab" data-tab="sc-bonus">SC Bonus $aver</button>
     <button class="tab" data-tab="posb-saye">POSB SAYE</button>
+    <button class="tab" data-tab="hsbc-ega">HSBC EGA</button>
+    <button class="tab" data-tab="ocbc-premier">OCBC Premier Div+</button>
   </div>
 
   <!-- Bank Selector (mobile) -->
@@ -189,6 +192,8 @@
       <option value="dbs-multi">DBS Multiplier</option>
       <option value="sc-bonus">SC Bonus $aver</option>
       <option value="posb-saye">POSB SAYE</option>
+      <option value="hsbc-ega">HSBC EGA</option>
+      <option value="ocbc-premier">OCBC Premier Div+</option>
     </select>
   </div>
 
@@ -485,6 +490,85 @@
 
     <div class="results" id="saye-results"></div>
     <div id="saye-table-container"></div>
+  </div>
+
+</div>
+
+  <!-- ==================== HSBC Everyday Global ==================== -->
+  <div class="tab-content" id="hsbc-ega">
+    <div class="bank-header">
+      <div>
+        <div class="bank-name" style="color:var(--hsbc-color)">HSBC Everyday Global Account</div>
+        <div class="bank-note">Multicurrency account · Everyday+ Rewards Programme</div>
+      </div>
+    </div>
+
+    <div class="input-section">
+      <div class="input-row">
+        <span class="input-label">Balance</span>
+        <div class="input-field"><input type="number" id="hsbc-balance" value="0" min="0" step="1000"></div>
+      </div>
+      <div class="input-row">
+        <span class="input-label">Everyday+ Rewards (deposit ≥$2,000 + 5 eligible txns)</span>
+        <label class="toggle"><input type="checkbox" id="hsbc-everyday-plus" checked><span class="slider"></span></label>
+      </div>
+    </div>
+
+    <div class="results" id="hsbc-results"></div>
+
+    <div class="section-divider"></div>
+    <div class="section-title">Interest Rates (Reference)</div>
+    <div class="table-scroll"><table class="ref-table">
+      <tr><th>Component</th><th>Rate p.a.</th><th>Requirement</th></tr>
+      <tr><td>Base Interest</td><td>0.05%</td><td>—</td></tr>
+      <tr><td>Everyday+ Bonus Interest</td><td>1.00%</td><td>Deposit ≥$2,000 + 5 eligible txns/month</td></tr>
+      <tr><td><strong>Total</strong></td><td><strong>1.05%</strong></td><td></td></tr>
+    </table></div>
+    <div class="note-box" style="margin-top:12px">
+      Note: Everyday+ also provides 1% cashback on eligible debit card spends (not included in calculation).
+      Promotional bonus rates may apply — check <a href="https://www.hsbc.com.sg/accounts/products/everyday-global/" target="_blank">HSBC website</a>.
+    </div>
+  </div>
+
+  <!-- ==================== OCBC Premier Dividend+ ==================== -->
+  <div class="tab-content" id="ocbc-premier">
+    <div class="bank-header">
+      <div>
+        <div class="bank-name" style="color:var(--ocbc-color)">OCBC Premier Dividend+ Savings</div>
+        <div class="bank-note">Premier Banking · Min initial deposit $50,000 fresh funds</div>
+      </div>
+    </div>
+
+    <div class="input-section">
+      <div class="input-row">
+        <span class="input-label">Balance</span>
+        <div class="input-field"><input type="number" id="ocbcp-balance" value="0" min="0" step="1000"></div>
+      </div>
+      <div class="input-row">
+        <span class="input-label">No withdrawals this month</span>
+        <label class="toggle"><input type="checkbox" id="ocbcp-no-withdraw" checked><span class="slider"></span></label>
+      </div>
+      <div class="input-row">
+        <span class="input-label">Deposit ≥$3,000 this month (requires no withdrawal)</span>
+        <label class="toggle"><input type="checkbox" id="ocbcp-save" checked><span class="slider"></span></label>
+      </div>
+    </div>
+
+    <div class="results" id="ocbcp-results"></div>
+
+    <div class="section-divider"></div>
+    <div class="section-title">Interest Rates (Reference)</div>
+    <div class="table-scroll"><table class="ref-table">
+      <tr><th>Component</th><th>Rate p.a.</th><th>Requirement</th></tr>
+      <tr><td>Base Interest</td><td>0.05%</td><td>—</td></tr>
+      <tr><td>'No Withdrawal' Bonus</td><td>1.00%</td><td>No withdrawals in the month</td></tr>
+      <tr><td>'No Withdrawal and Save' Bonus</td><td>0.55%</td><td>No withdrawals + deposit ≥$3,000</td></tr>
+      <tr><td><strong>Total</strong></td><td><strong>1.60%</strong></td><td></td></tr>
+    </table></div>
+    <div class="note-box" style="margin-top:12px">
+      OCBC Premier Banking customers only. Initial deposit of at least $50,000 in fresh funds required.
+      See <a href="https://www.ocbc.com/premier-banking/our-solutions/deposits/premier-dividend-plus-savings" target="_blank">OCBC website</a> for full details.
+    </div>
   </div>
 
 </div>
@@ -806,6 +890,68 @@ function calcSCBonus() {
   return { balance, interestPA: totalInterest, investAmt: investOn ? investAmt : 0, investReturnPA };
 }
 
+// ==================== HSBC Everyday Global Calculation ====================
+function calcHSBCEGA() {
+  const balance = num('hsbc-balance');
+  const everydayPlus = checked('hsbc-everyday-plus') ? 1 : 0;
+
+  const baseRate = 0.0005;
+  const bonusRate = 0.01;
+
+  let totalRate = baseRate;
+  if (everydayPlus) totalRate += bonusRate;
+
+  const totalInterest = balance * totalRate;
+  const effectiveRate = totalRate;
+
+  const results = $('hsbc-results');
+  results.innerHTML = `
+    <h3>Results</h3>
+    <div class="result-row"><span>Base Interest (0.05%)</span><span class="result-value">${fmtD(balance * baseRate)}</span></div>
+    <div class="result-row"><span>Everyday+ Bonus (1.00%) ${everydayPlus ? '✓' : '✗'}</span><span class="result-value">${fmtD(everydayPlus ? balance * bonusRate : 0)}</span></div>
+    <div class="result-row" style="border-top:2px solid var(--border);padding-top:8px"><span><strong>Total Interest p.a.</strong></span><span class="result-value"><strong>${fmtD(totalInterest)}</strong></span></div>
+    <div class="result-row"><span><strong>Effective Interest Rate</strong></span><span class="result-value"><strong>${fmtP(effectiveRate)}</strong></span></div>
+    <div class="result-row"><span>Total Interest p.m.</span><span class="result-value">${fmtD(totalInterest / 12)}</span></div>
+  `;
+
+  return { balance, interestPA: totalInterest };
+}
+
+// ==================== OCBC Premier Dividend+ Calculation ====================
+function calcOCBCPremier() {
+  const balance = num('ocbcp-balance');
+  const noWithdraw = checked('ocbcp-no-withdraw') ? 1 : 0;
+  const save3k = checked('ocbcp-save') ? 1 : 0;
+
+  const baseRate = 0.0005;
+  const noWithdrawRate = 0.01;
+  const saveRate = 0.0055;
+
+  let totalRate = baseRate;
+  if (noWithdraw) totalRate += noWithdrawRate;
+  if (noWithdraw && save3k) totalRate += saveRate;
+
+  const totalInterest = balance * totalRate;
+  const effectiveRate = totalRate;
+
+  const baseInterest = balance * baseRate;
+  const noWithdrawInterest = noWithdraw ? balance * noWithdrawRate : 0;
+  const saveInterest = (noWithdraw && save3k) ? balance * saveRate : 0;
+
+  const results = $('ocbcp-results');
+  results.innerHTML = `
+    <h3>Results</h3>
+    <div class="result-row"><span>Base Interest (0.05%)</span><span class="result-value">${fmtD(baseInterest)}</span></div>
+    <div class="result-row"><span>'No Withdrawal' Bonus (1.00%) ${noWithdraw ? '✓' : '✗'}</span><span class="result-value">${fmtD(noWithdrawInterest)}</span></div>
+    <div class="result-row"><span>'No Withdrawal + Save' Bonus (0.55%) ${noWithdraw && save3k ? '✓' : '✗'}</span><span class="result-value">${fmtD(saveInterest)}</span></div>
+    <div class="result-row" style="border-top:2px solid var(--border);padding-top:8px"><span><strong>Total Interest p.a.</strong></span><span class="result-value"><strong>${fmtD(totalInterest)}</strong></span></div>
+    <div class="result-row"><span><strong>Effective Interest Rate</strong></span><span class="result-value"><strong>${fmtP(effectiveRate)}</strong></span></div>
+    <div class="result-row"><span>Total Interest p.m.</span><span class="result-value">${fmtD(totalInterest / 12)}</span></div>
+  `;
+
+  return { balance, interestPA: totalInterest };
+}
+
 // ==================== POSB SAYE Calculation ====================
 function calcPOSBSaye() {
   const monthlySave = num('saye-monthly');
@@ -930,11 +1076,13 @@ function updateAll() {
   const ocbc = calcOCBC360();
   const dbs = calcDBSMulti();
   const sc = calcSCBonus();
+  const hsbc = calcHSBCEGA();
+  const ocbcp = calcOCBCPremier();
 
   const totalBalance = uob1.balance + uobs.balance + ocbc.balance + dbs.balance + sc.balance
-    + (ocbc.investAmt || 0) + (sc.investAmt || 0);
+    + (ocbc.investAmt || 0) + (sc.investAmt || 0) + hsbc.balance + ocbcp.balance;
   const totalInterest = uob1.interestPA + uobs.interestPA + ocbc.interestPA + dbs.interestPA + sc.interestPA
-    + (ocbc.investReturnPA || 0) + (sc.investReturnPA || 0);
+    + (ocbc.investReturnPA || 0) + (sc.investReturnPA || 0) + hsbc.interestPA + ocbcp.interestPA;
   const effectiveRate = totalBalance > 0 ? totalInterest / totalBalance : 0;
 
   $('sum-total-balance').textContent = fmtD(totalBalance);
