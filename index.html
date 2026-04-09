@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Singapore Banks Savings Interest Comparison</title>
+<style>
+  :root {
+    --uob-color: #003DA5;
+    --ocbc-color: #D0021B;
+    --dbs-color: #D0021B;
+    --sc-color: #0072AA;
+    --posb-color: #D40000;
+    --bg: #f5f7fa;
+    --card-bg: #fff;
+    --text: #2d3748;
+    --text-muted: #718096;
+    --border: #e2e8f0;
+    --accent: #3182ce;
+    --input-bg: #fffff0;
+    --green: #38a169;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 16px; }
+  h1 { text-align: center; margin: 16px 0 8px; font-size: 1.6rem; color: var(--text); }
+  .subtitle { text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; }
+
+  /* Summary Cards */
+  .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .summary-card { background: var(--card-bg); border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center; }
+  .summary-card .label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .summary-card .value { font-size: 1.5rem; font-weight: 700; color: var(--accent); margin-top: 4px; }
+  .summary-card .sub { font-size: 0.8rem; color: var(--text-muted); }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; border-bottom: 2px solid var(--border); margin-bottom: 0; overflow-x: auto; flex-wrap: nowrap; }
+  .tab { padding: 10px 18px; cursor: pointer; border: none; background: none; font-size: 0.9rem; font-weight: 500; color: var(--text-muted); border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* Bank Sections */
+  .tab-content { display: none; background: var(--card-bg); border-radius: 0 0 12px 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  .tab-content.active { display: block; }
+
+  .bank-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
+  .bank-name { font-size: 1.3rem; font-weight: 700; }
+  .bank-note { font-size: 0.85rem; color: var(--text-muted); }
+
+  /* Input Groups */
+  .input-section { margin-bottom: 16px; }
+  .input-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .input-row:last-child { border-bottom: none; }
+  .input-label { flex: 1; font-size: 0.9rem; min-width: 200px; }
+  .input-field { width: 160px; }
+  .input-field input[type="number"] {
+    width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px;
+    font-size: 0.95rem; background: var(--input-bg); transition: border-color 0.2s;
+  }
+  .input-field input:focus { outline: none; border-color: var(--accent); }
+  .input-note { font-size: 0.8rem; color: var(--text-muted); }
+
+  /* Toggle Switch */
+  .toggle { position: relative; width: 50px; height: 26px; flex-shrink: 0; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle .slider {
+    position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+    background: #cbd5e0; border-radius: 26px; transition: 0.3s;
+  }
+  .toggle .slider:before {
+    content: ""; position: absolute; height: 20px; width: 20px; left: 3px; bottom: 3px;
+    background: white; border-radius: 50%; transition: 0.3s;
+  }
+  .toggle input:checked + .slider { background: var(--green); }
+  .toggle input:checked + .slider:before { transform: translateX(24px); }
+
+  /* Results */
+  .results { background: #f7fafc; border-radius: 8px; padding: 16px; margin-top: 16px; }
+  .results h3 { font-size: 1rem; margin-bottom: 10px; color: var(--text); }
+  .result-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  .result-row:last-child { border-bottom: none; }
+  .result-value { font-weight: 600; color: var(--accent); }
+
+  /* Reference Tables */
+  .ref-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 12px; }
+  .ref-table th, .ref-table td { padding: 6px 10px; border: 1px solid var(--border); text-align: center; }
+  .ref-table th { background: #edf2f7; font-weight: 600; }
+  .ref-table .highlight { background: #fffff0; }
+
+  /* POSB SAYE Table */
+  .saye-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 12px; }
+  .saye-table th, .saye-table td { padding: 4px 8px; border: 1px solid var(--border); text-align: right; }
+  .saye-table th { background: #edf2f7; font-weight: 600; text-align: center; }
+  .saye-table .year-end { background: #fffff0; font-weight: 600; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .input-row { flex-direction: column; align-items: flex-start; gap: 4px; }
+    .input-field { width: 100%; }
+    .tab { padding: 8px 12px; font-size: 0.8rem; }
+    .summary { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  select {
+    padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px;
+    font-size: 0.95rem; background: var(--input-bg);
+  }
+  .section-divider { border-top: 2px solid var(--border); margin: 16px 0; padding-top: 12px; }
+  .section-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 8px; color: var(--text); }
+  .note-box { background: #fffff0; border: 1px solid #ecc94b; border-radius: 6px; padding: 10px; font-size: 0.8rem; color: #744210; margin-bottom: 12px; }
+  footer { text-align: center; padding: 24px; color: var(--text-muted); font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Singapore Banks Savings Interest Comparison</h1>
+  <p class="subtitle">Effective from 1 May 2025 — Compare UOB One, UOB Stash, OCBC 360, DBS Multiplier, SC Bonus $aver & POSB SAYE</p>
+
+  <!-- Summary Dashboard -->
+  <div class="summary">
+    <div class="summary-card">
+      <div class="label">Total Balance (All Banks)</div>
+      <div class="value" id="sum-total-balance">$0</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">Total Interest p.a.</div>
+      <div class="value" id="sum-total-interest-pa">$0</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">Effective Rate p.a.</div>
+      <div class="value" id="sum-effective-rate">0.00%</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">Total Interest p.m.</div>
+      <div class="value" id="sum-total-interest-pm">$0</div>
+    </div>
+  </div>
+
+  <!-- Bank Tabs -->
+  <div class="tabs">
+    <button class="tab active" data-tab="uob-one">UOB One</button>
+    <button class="tab" data-tab="uob-stash">UOB Stash</button>
+    <button class="tab" data-tab="ocbc-360">OCBC 360</button>
+    <button class="tab" data-tab="dbs-multi">DBS Multiplier</button>
+    <button class="tab" data-tab="sc-bonus">SC Bonus $aver</button>
+    <button class="tab" data-tab="posb-saye">POSB SAYE</button>
+  </div>
+
+  <!-- ==================== UOB One ==================== -->
+  <div class="tab-content active" id="uob-one">
+    <div class="bank-header">
+      <div>
+        <div class="bank-name" style="color:var(--uob-color)">UOB One</div>
+        <div class="bank-note">Minimum balance $1,000 · Max $150,000</div>
+      </div>
+    </div>
+
+    <div class="input-section">
+      <div class="input-row">
+        <span class="input-label">Balance</span>
+        <div class="input-field"><input type="number" id="uob1-balance" value="150000" min="0" max="150000" step="1000"></div>
+        <span class="input-note">Max $150,000</span>
+      </div>
+      <div class="input-row">
+        <span class="input-label">CC Spend, min $500</span>
+        <label class="toggle"><input type="checkbox" id="uob1-cc" checked><span class="slider"></span></label>
+      </div>
+      <div class="input-row">
+        <span class="input-label">3 GIRO Transactions</span>
+        <label class="toggle"><input type="checkbox" id="uob1-giro" checked><span class="slider"></span></label>
+      </div>
+      <div class="input-row">
+        <span class="input-label">Salary Credit, min $1,600</span>
+        <label class="toggle"><input type="checkbox" id="uob1-salary" checked><span class="slider"></span></label>
+        <span class="input-note">HSBC/UOB SALA with Salary Payment Method</span>
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+    <div class="section-title">Tax Rebate</div>
+    <div class="input-section">
+      <div class="input-row">
+        <span class="input-label">Tax Rebate Tier</span>
+        <select id="uob1-tax-tier">
+          <option value="1" selected>Tier 1</option>
+          <option value="2">Tier 2</option>
+        </select>
+      </div>
+      <div class="input-row">
+        <span class="input-label">Monthly Tax Amount ($)</span>
+        <div class="input-field"><input type="number" id="uob1-monthly-tax" value="900" min="0" step="100"></div>
+      </div>
+    </div>
+
+    <div class="results" id="uob1-results"></div>
+
+    <div class="section-divider"></div>
+    <div class="section-title">Interest Rate Tiers (Reference)</div>
+    <table class="ref-table">
+      <tr><th></th><th>Balance Tier</th><th>Total</th><th>Spend 500</th><th>Spend 500 + 3 Giro</th><th>Spend 500 + Salary</th></tr>
+      <tr><td>1st</td><td>$30,000</td><td>$30,000</td><td>0.65%</td><td>1.00%</td><td>1.00%</td></tr>
+      <tr><td>Next</td><td>$30,000</td><td>$60,000</td><td>0.65%</td><td>1.00%</td><td>1.00%</td></tr>
+      <tr><td>Next</td><td>$15,000</td><td>$75,000</td><td>0.65%</td><td>1.00%</td><td>1.00%</td></tr>
+      <tr><td>Next</td><td>$25,000</td><td>$100,000</td><td>0.05%</td><td>2.00%</td><td>2.50%</td></tr>
+      <tr><td>Next</td><td>$25,000</td><td>$125,000</td><td>0.05%</td><td>2.00%</td><td>2.50%</td></tr>
+      <tr><td>Next</td><td>$25,000</td><td>$150,000</td><td>0.05%</td><td>0.05%</td><td>3.40%</td></tr>
+      <tr><td>Above</td><td>$150,000+</td><td>-</td><td>0.05%</td><td>0.05%</td><td>0.05%</td></tr>
+    </table>
+
+    <div class="section-title" style="margin-top:12px">Tax Rebate Tiers</div>
+    <table class="ref-table">
+      <tr><th>MAB Range</th><th>Tier 1 Rate</th><th>Tier 2 Rate</th><th>Monthly Cap</th></tr>
+      <tr><td>$30,000 - $74,999</td><td>6%</td><td>6.50%</td><td>$10</td></tr>
+      <tr><td>$75,000 - $149,999</td><td>6%</td><td>6.50%</td><td>$25</td></tr>
+      <tr><td>$150,000+</td><td>6%</td><td>6.50%</td><td>$50</td></tr>
+    </table>
+  </div>
+
+  <!-- ==================== UOB Stash ==================== -->
+  <div class="tab-content" id="uob-stash">
+    <div class="bank-header">
+      <div>
+        <div class="bank-name" style="color:var(--uob-color)">UOB Stash</div>
+        <div class="bank-note">Minimum balance $1,000 · Max $100,000</div>
+      </div>
+    </div>
+
+    <div class="input-section">
+      <div class="input-row">
+        <span class="input-label">Balance</span>
+        <div class="input-field"><input type="number" id="uobs-balance" value="0" min="0" max="100000" step="1000"></div>
+        <span class="input-note">Max $100,000</span>
+      </div>
+      <div class="input-row">
+        <span class="input-label">Maintain or increase Monthly Average Balance (MAB)</span>
+        <label class="toggle"><input type="checkbox" id="uobs-mab" checked><span class="slider"></span></label>
+      </div>
+    </div>
+
+    <div class="results" id="uobs-results"></div>
+
+    <div class="section-divider"></div>
+    <div class="section-title">Interest Rate Tiers (Reference)</div>
+    <table class="ref-table">
+      <tr><th></th><th>Balance Tier</th><th>Total</th><th>Rate (MAB increase)</th></tr>
+      <tr><td>1st</td><td>$10,000</td><td>$10,000</td><td>0.05%</td></tr>
+      <tr><td>Next</td><td>$30,000</td><td>$40,000</td><td>1.40%</td></tr>
+      <tr><td>Next</td><td>$30,000</td><td>$70,000</td><td>1.60%</td></tr>
+      <tr><td>Next</td><td>$30,000</td><td>$100,000</td><td>2.00%</td></tr>
+      <tr><td>Above</td><td>$100,000+</td><td>-</td><td>0.05%</td></tr>
+    </table>
+  </div>
+
+  <!-- ==================== OCBC 360 ==================== -->
+  <div class="tab-content" id="ocbc-360">
+    <div class="bank-header">
+      <div>
+        <div class="bank-name" style="color:var(--ocbc-color)">OCBC 360</div>
+        <div class="bank-note">Minimum balance $3,000 · Max $100,000</div>
+      </div>
+    </div>
+
+    <div class="input-section">
+      <div class="input-row">
+        <span class="input-label">Balance</span>
+        <div class="input-field"><input type="number" id="ocbc-balance" value="100000" min="0" max="100000" step="1000"></div>
+        <span class="input-note">Max $100,000</span>
+      </div>
+      <div class="input-row">
+        <span class="input-label">Salary Credit, min $1,800 (cannot SALA)</span>
+        <label class="toggle"><input type="checkbox" id="ocbc-salary" checked><span class="slider"></span></label>
+      </div>
+      <div class="input-row">
+        <span class="input-label">Save avg daily balance &gt; $500</span>
+        <label class="toggle"><input type="checkbox" id="ocbc-save" checked><span class="slider"></span></label>
+      </div>
+      <div class="input-row">
+        <span class="input-label">CC Spend, min $500</span>
+        <label class="toggle"><input type="checkbox" id="ocbc-cc" checked><span class="slider"></span></label>
+      </div>
+      <div class="input-row">
+        <span class="input-label">Invest (min $20,000)</span>
+        <label class="toggle"><input type="checkbox" id="ocbc-invest" checked><span class="slider"></span></label>
+      </div>
+      <div class="input-row">
+        <span class="input-label">Investment Amount</span>
+        <div class="input-field"><input type="number" id="ocbc-invest-amt" value="20000" min="0" step="1000"></div>
+      </div>
+      <div class="input-row">
+        <span class="input-label">Assumed Investment Return p.a.</span>
+        <div class="input-field"><input type="number" id="ocbc-invest-return" value="1.70" min="0" step="0.1">%</div>
+      </div>
+    </div>
+
+    <div class="results" id="ocbc-results"></div>
+
+    <div class="section-divider"></div>
+    <div class="section-title">Interest Rate Tiers (Reference)</div>
+    <table class="ref-table">
+      <tr><th></th><th>Balance Tier</th><th>Total</th><th>Salary</th><th>Save $500</th><th>Spend $500</th><th>Invest</th></tr>
+      <tr><td>1st $75k</td><td>$75,000</td><td>$75,000</td><td>1.00%</td><td>0.40%</td><td>0.25%</td><td>1.20%</td></tr>
+      <tr><td>Next $25k</td><td>$25,000</td><td>$100,000</td><td>2.00%</td><td>0.40%</td><td>0.25%</td><td>2.00%</td></tr>
+    </table>
+  </div>
+
+  <!-- ==================== DBS Multiplier ==================== -->
+  <div class="tab-content" id="dbs-multi">
+    <div class="bank-header">
+      <div>
+        <div class="bank-name" style="color:var(--dbs-color)">DBS Multiplier</div>
+        <div class="bank-note">Minimum balance $3,000 · Max $100,000</div>
+      </div>
+    </div>
+
+    <div class="input-section">
+      <div class="input-row">
+        <span class="input-label">Balance</span>
+        <div class="input-field"><input type="number" id="dbs-balance" value="100000" min="0" max="100000" step="1000"></div>
+        <span class="input-note">Max $100,000</span>
+      </div>
+      <div class="input-row">
+        <span class="input-label">Salary Credit, min $500</span>
+        <label class="toggle"><input type="checkbox" id="dbs-salary" checked><span class="slider"></span></label>
+        <span class="input-note">HSBC/UOB SALA with Salary Payment Method</span>
+      </div>
+      <div class="input-row">
+        <span class="input-label">PayLah!/CC Spend, min $1</span>
+        <label class="toggle"><input type="checkbox" id="dbs-cc" checked><span class="slider"></span></label>
+      </div>
+      <div class="input-row">
+        <span class="input-label">Invest, min $100 per month</span>
+        <label class="toggle"><input type="checkbox" id="dbs-invest" checked><span class="slider"></span></label>
+      </div>
+      <div class="input-row">
+        <span class="input-label">Insurance</span>
+        <label class="toggle"><input type="checkbox" id="dbs-insurance" checked><span class="slider"></span></label>
+      </div>
+      <div class="input-row">
+        <span class="input-label">Eligible Transaction Tier</span>
+        <select id="dbs-tier">
+          <option value="1">Tier 1 ($500 - $15,000)</option>
+          <option value="2">Tier 2 ($15,000 - $30,000)</option>
+          <option value="3" selected>Tier 3 ($30,000+)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="results" id="dbs-results"></div>
+
+    <div class="section-divider"></div>
+    <div class="section-title">Interest Rate Tiers (Reference)</div>
+    <table class="ref-table">
+      <tr><th>Txn Tier</th><th>Eligible Transaction</th><th>Income + 1 Cat</th><th>Income + 2 Cat</th><th>Income + 3 Cat</th></tr>
+      <tr><td>1</td><td>$500 - $15,000</td><td>1.80%</td><td>2.10%</td><td>2.40%</td></tr>
+      <tr><td>2</td><td>$15,000 - $30,000</td><td>1.90%</td><td>2.20%</td><td>2.50%</td></tr>
+      <tr><td>3</td><td>$30,000+</td><td>2.20%</td><td>3.00%</td><td>4.10%</td></tr>
+    </table>
+  </div>
+
+  <!-- ==================== SC Bonus $aver ==================== -->
+  <div class="tab-content" id="sc-bonus">
+    <div class="bank-header">
+      <div>
+        <div class="bank-name" style="color:var(--sc-color)">Standard Chartered Bonus $aver</div>
+        <div class="bank-note">Minimum balance $3,000 · Max $100,000</div>
+      </div>
+    </div>
+
+    <div class="input-section">
+      <div class="input-row">
+        <span class="input-label">Balance</span>
+        <div class="input-field"><input type="number" id="sc-balance" value="100000" min="0" max="100000" step="1000"></div>
+        <span class="input-note">Max $100,000</span>
+      </div>
+      <div class="input-row">
+        <span class="input-label">Salary Credit $3,000 (can GIRO SALA)</span>
+        <label class="toggle"><input type="checkbox" id="sc-salary" checked><span class="slider"></span></label>
+        <span class="input-note">Salary Credit $3k</span>
+      </div>
+      <div class="input-row">
+        <span class="input-label">DC/CC Spend, $1,000</span>
+        <label class="toggle"><input type="checkbox" id="sc-cc" checked><span class="slider"></span></label>
+        <span class="input-note">Grab refund</span>
+      </div>
+      <div class="input-row">
+        <span class="input-label">Invest, $30,000 (6 months)</span>
+        <label class="toggle"><input type="checkbox" id="sc-invest" checked><span class="slider"></span></label>
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+    <div class="section-title">Investment (Cash+)</div>
+    <div class="input-section">
+      <div class="input-row">
+        <span class="input-label">Investment Amount</span>
+        <div class="input-field"><input type="number" id="sc-invest-amt" value="30000" min="0" step="1000"></div>
+      </div>
+      <div class="input-row">
+        <span class="input-label">Assumed Investment Return p.a.</span>
+        <div class="input-field"><input type="number" id="sc-invest-return" value="1.70" min="0" step="0.1">%</div>
+      </div>
+    </div>
+
+    <div class="results" id="sc-results"></div>
+
+    <div class="section-divider"></div>
+    <div class="section-title">Interest Rates</div>
+    <table class="ref-table">
+      <tr><th>Category</th><th>Interest p.a.</th></tr>
+      <tr><td>Salary Credit $3,000</td><td>0.90%</td></tr>
+      <tr><td>DC/CC Spend $1,000</td><td>0.90%</td></tr>
+      <tr><td>Invest $30,000 (6 months)</td><td>1.50%</td></tr>
+    </table>
+  </div>
+
+  <!-- ==================== POSB SAYE ==================== -->
+  <div class="tab-content" id="posb-saye">
+    <div class="bank-header">
+      <div>
+        <div class="bank-name" style="color:var(--posb-color)">POSB SAYE (Save As You Earn)</div>
+        <div class="bank-note">Monthly fixed savings plan</div>
+      </div>
+    </div>
+
+    <div class="input-section">
+      <div class="input-row">
+        <span class="input-label">Fixed Savings per month</span>
+        <div class="input-field"><input type="number" id="saye-monthly" value="1500" min="0" step="100"></div>
+      </div>
+      <div class="input-row">
+        <span class="input-label">Base Interest Rate p.a.</span>
+        <div class="input-field"><input type="number" id="saye-base-rate" value="0.05" min="0" step="0.01">%</div>
+      </div>
+      <div class="input-row">
+        <span class="input-label">Bonus Interest Rate p.a.</span>
+        <div class="input-field"><input type="number" id="saye-bonus-rate" value="3.50" min="0" step="0.1">%</div>
+      </div>
+    </div>
+
+    <div class="results" id="saye-results"></div>
+    <div id="saye-table-container"></div>
+  </div>
+
+</div>
+
+<footer>
+  Data based on bank rates effective 1 May 2025. Always verify with official bank sources.
+  <br>Built for comparison purposes only — not financial advice.
+</footer>
+
+<script>
+// ==================== Utility Functions ====================
+const $ = id => document.getElementById(id);
+const num = id => parseFloat($(id).value) || 0;
+const checked = id => $(id).checked;
+const fmt = (n, d=2) => n.toLocaleString('en-SG', {minimumFractionDigits: d, maximumFractionDigits: d});
+const fmtD = n => '$' + fmt(n);
+const fmtP = (n, d=2) => fmt(n * 100, d) + '%';
+
+// ==================== UOB One Calculation ====================
+function calcUOBOne() {
+  const balance = Math.min(num('uob1-balance'), 150000);
+  const ccSpend = checked('uob1-cc') ? 1 : 0;
+  const giro = checked('uob1-giro') ? 1 : 0;
+  const salary = checked('uob1-salary') ? 1 : 0;
+  const taxTier = parseInt($('uob1-tax-tier').value);
+  const monthlyTax = num('uob1-monthly-tax');
+
+  // Interest rate tiers
+  const tiers = [
+    { amount: 30000, spend: 0.0065, giro: 0.01, salary: 0.01 },
+    { amount: 30000, spend: 0.0065, giro: 0.01, salary: 0.01 },
+    { amount: 15000, spend: 0.0065, giro: 0.01, salary: 0.01 },
+    { amount: 25000, spend: 0.0005, giro: 0.02, salary: 0.025 },
+    { amount: 25000, spend: 0.0005, giro: 0.02, salary: 0.025 },
+    { amount: 25000, spend: 0.0005, giro: 0.0005, salary: 0.034 },
+  ];
+  const aboveRate = { spend: 0.0005, giro: 0.0005, salary: 0.0005 };
+
+  // Calculate tiered interest for a given rate column
+  function calcTieredInterest(bal, rateKey) {
+    let remaining = bal;
+    let interest = 0;
+    for (const tier of tiers) {
+      const amt = Math.min(remaining, tier.amount);
+      interest += amt * tier[rateKey];
+      remaining -= amt;
+      if (remaining <= 0) break;
+    }
+    if (remaining > 0) {
+      interest += remaining * aboveRate[rateKey];
+    }
+    return interest;
+  }
+
+  // Determine which rate column based on toggles
+  // CC + no giro + no salary => spend only
+  // CC + no giro + salary => salary
+  // CC + giro + no salary => giro
+  // CC + giro + salary => salary
+  let eir = 0;
+  let interestPA = 0;
+  if (ccSpend === 1) {
+    if (giro === 0 && salary === 0) {
+      interestPA = calcTieredInterest(balance, 'spend');
+    } else if (giro === 0 && salary === 1) {
+      interestPA = calcTieredInterest(balance, 'salary');
+    } else if (giro === 1 && salary === 0) {
+      interestPA = calcTieredInterest(balance, 'giro');
+    } else { // giro && salary
+      interestPA = calcTieredInterest(balance, 'salary');
+    }
+    eir = balance > 0 ? interestPA / balance : 0;
+  }
+
+  // Tax Rebate calculation
+  const rebateTiers = [
+    { mab: 30000, maxMab: 75000, tier1Rate: 0.06, tier2Rate: 0.065, cap: 10 },
+    { mab: 75000, maxMab: 150000, tier1Rate: 0.06, tier2Rate: 0.065, cap: 25 },
+    { mab: 150000, maxMab: Infinity, tier1Rate: 0.06, tier2Rate: 0.065, cap: 50 },
+  ];
+
+  let monthlyRebate = 0;
+  const rate = taxTier === 1 ? 'tier1Rate' : 'tier2Rate';
+  for (const r of rebateTiers) {
+    if (balance >= r.mab) {
+      const rebateCalc = monthlyTax * r[rate];
+      monthlyRebate = Math.min(rebateCalc, r.cap);
+    }
+  }
+  const annualRebate = monthlyRebate * 12;
+
+  const totalInterestPA = interestPA + annualRebate;
+  const effectiveRate = balance > 0 ? totalInterestPA / balance : 0;
+
+  const results = $('uob1-results');
+  results.innerHTML = `
+    <h3>Results</h3>
+    <div class="result-row"><span>Interest from Rates (p.a.)</span><span class="result-value">${fmtD(interestPA)}</span></div>
+    <div class="result-row"><span>EIR from Rates</span><span class="result-value">${fmtP(eir)}</span></div>
+    <div class="result-row"><span>Monthly Tax Rebate</span><span class="result-value">${fmtD(monthlyRebate)}</span></div>
+    <div class="result-row"><span>Annual Tax Rebate</span><span class="result-value">${fmtD(annualRebate)}</span></div>
+    <div class="result-row"><span><strong>Total Interest p.a.</strong></span><span class="result-value"><strong>${fmtD(totalInterestPA)}</strong></span></div>
+    <div class="result-row"><span><strong>Effective Interest Rate</strong></span><span class="result-value"><strong>${fmtP(effectiveRate)}</strong></span></div>
+    <div class="result-row"><span>Total Interest p.m.</span><span class="result-value">${fmtD(totalInterestPA / 12)}</span></div>
+  `;
+
+  return { balance, interestPA: totalInterestPA };
+}
+
+// ==================== UOB Stash Calculation ====================
+function calcUOBStash() {
+  const balance = Math.min(num('uobs-balance'), 100000);
+  const mab = checked('uobs-mab') ? 1 : 0;
+
+  // Tiers with MAB increase
+  const tiers = [
+    { amount: 10000, rate: 0.0005 },
+    { amount: 30000, rate: 0.014 },
+    { amount: 30000, rate: 0.016 },
+    { amount: 30000, rate: 0.02 },
+  ];
+  const aboveRate = 0.0005;
+
+  let totalInterest = 0;
+  let remaining = balance;
+  let cumulative = 0;
+
+  for (const tier of tiers) {
+    const prev = cumulative;
+    cumulative += tier.amount;
+    if (balance > cumulative) {
+      totalInterest += tier.amount * tier.rate;
+    } else if (balance > prev) {
+      totalInterest += (balance - prev) * tier.rate;
+    }
+    remaining = Math.max(0, balance - cumulative);
+  }
+  if (remaining > 0) {
+    totalInterest += remaining * aboveRate;
+  }
+
+  // If MAB not maintained, use flat 0.05%
+  if (mab === 0) {
+    totalInterest = balance * 0.0005;
+  }
+
+  const effectiveRate = balance > 0 ? totalInterest / balance : 0;
+
+  const results = $('uobs-results');
+  results.innerHTML = `
+    <h3>Results</h3>
+    <div class="result-row"><span><strong>Total Interest p.a.</strong></span><span class="result-value"><strong>${fmtD(totalInterest)}</strong></span></div>
+    <div class="result-row"><span><strong>Effective Interest Rate</strong></span><span class="result-value"><strong>${fmtP(effectiveRate)}</strong></span></div>
+    <div class="result-row"><span>Total Interest p.m.</span><span class="result-value">${fmtD(totalInterest / 12)}</span></div>
+  `;
+
+  return { balance, interestPA: totalInterest };
+}
+
+// ==================== OCBC 360 Calculation ====================
+function calcOCBC360() {
+  const balance = Math.min(num('ocbc-balance'), 100000);
+  const salaryOn = checked('ocbc-salary') ? 1 : 0;
+  const saveOn = checked('ocbc-save') ? 1 : 0;
+  const ccOn = checked('ocbc-cc') ? 1 : 0;
+  const investOn = checked('ocbc-invest') ? 1 : 0;
+  const investAmt = num('ocbc-invest-amt');
+  const investReturn = num('ocbc-invest-return') / 100;
+
+  // Rate tiers: first 75k and next 25k
+  const rates = {
+    salary: { first75k: 0.01, next25k: 0.02 },
+    save:   { first75k: 0.004, next25k: 0.004 },
+    spend:  { first75k: 0.0025, next25k: 0.0025 },
+    invest: { first75k: 0.012, next25k: 0.02 },
+  };
+
+  function calcCategoryInterest(cat) {
+    const r = rates[cat];
+    if (balance > 75000) {
+      return 75000 * r.first75k + (balance - 75000) * r.next25k;
+    }
+    return balance * r.first75k;
+  }
+
+  const salaryInterest = calcCategoryInterest('salary');
+  const saveInterest = calcCategoryInterest('save');
+  const spendInterest = calcCategoryInterest('spend');
+  const investInterest = calcCategoryInterest('invest');
+
+  // EIR for each category
+  const salaryEIR = balance > 0 ? salaryInterest / balance : 0;
+  const saveEIR = balance > 0 ? saveInterest / balance : 0;
+  const spendEIR = balance > 0 ? spendInterest / balance : 0;
+  const investEIR = balance > 0 ? investInterest / balance : 0;
+
+  // Total interest based on selected categories
+  let totalInterest = 0;
+  if (salaryOn) totalInterest += salaryInterest;
+  if (saveOn) totalInterest += saveInterest;
+  if (ccOn) totalInterest += spendInterest;
+  if (investOn && investAmt >= 20000) totalInterest += investInterest;
+
+  const effectiveRate = balance > 0 ? totalInterest / balance : 0;
+
+  // Investment return
+  const investReturnPA = investOn ? investAmt * investReturn : 0;
+  const totalReturnPA = totalInterest + investReturnPA;
+  const totalReturnRate = (balance + (investOn ? investAmt : 0)) > 0
+    ? totalReturnPA / (balance + (investOn ? investAmt : 0)) : 0;
+
+  const results = $('ocbc-results');
+  results.innerHTML = `
+    <h3>Results — Interest Breakdown</h3>
+    <div class="result-row"><span>Salary Interest (p.a.) ${salaryOn ? '✓' : '✗'}</span><span class="result-value">${fmtD(salaryOn ? salaryInterest : 0)} (${fmtP(salaryEIR)})</span></div>
+    <div class="result-row"><span>Save $500 Interest (p.a.) ${saveOn ? '✓' : '✗'}</span><span class="result-value">${fmtD(saveOn ? saveInterest : 0)} (${fmtP(saveEIR)})</span></div>
+    <div class="result-row"><span>Spend $500 Interest (p.a.) ${ccOn ? '✓' : '✗'}</span><span class="result-value">${fmtD(ccOn ? spendInterest : 0)} (${fmtP(spendEIR)})</span></div>
+    <div class="result-row"><span>Invest Interest (p.a.) ${investOn ? '✓' : '✗'}</span><span class="result-value">${fmtD(investOn && investAmt >= 20000 ? investInterest : 0)} (${fmtP(investEIR)})</span></div>
+    <div class="result-row" style="border-top:2px solid var(--border);padding-top:8px"><span><strong>Total Savings Interest p.a.</strong></span><span class="result-value"><strong>${fmtD(totalInterest)}</strong></span></div>
+    <div class="result-row"><span><strong>Effective Interest Rate</strong></span><span class="result-value"><strong>${fmtP(effectiveRate)}</strong></span></div>
+    <div class="result-row"><span>Total Interest p.m.</span><span class="result-value">${fmtD(totalInterest / 12)}</span></div>
+    ${investOn ? `
+    <div class="result-row" style="border-top:2px solid var(--border);padding-top:8px"><span>Investment Return p.a. (@ ${fmtP(investReturn)})</span><span class="result-value">${fmtD(investReturnPA)}</span></div>
+    <div class="result-row"><span><strong>Total Return (Savings + Invest) p.a.</strong></span><span class="result-value"><strong>${fmtD(totalReturnPA)}</strong></span></div>
+    <div class="result-row"><span>Combined Return Rate</span><span class="result-value">${fmtP(totalReturnRate)}</span></div>
+    ` : ''}
+  `;
+
+  return { balance, interestPA: totalInterest, investAmt: investOn ? investAmt : 0, investReturnPA };
+}
+
+// ==================== DBS Multiplier Calculation ====================
+function calcDBSMulti() {
+  const balance = Math.min(num('dbs-balance'), 100000);
+  const salaryOn = checked('dbs-salary') ? 1 : 0;
+  const ccOn = checked('dbs-cc') ? 1 : 0;
+  const investOn = checked('dbs-invest') ? 1 : 0;
+  const insuranceOn = checked('dbs-insurance') ? 1 : 0;
+  const txnTier = parseInt($('dbs-tier').value);
+
+  // Rate table [tier][categories-1]
+  // tier 1/2/3, income+1cat, income+2cat, income+3cat
+  const rateTable = [
+    [0.018, 0.021, 0.024],  // tier 1
+    [0.019, 0.022, 0.025],  // tier 2
+    [0.022, 0.030, 0.041],  // tier 3
+  ];
+
+  // Count categories (salary is required as "income", others are additional)
+  const numCategories = salaryOn + ccOn + investOn + insuranceOn;
+
+  let rate = 0;
+  if (numCategories >= 2 && salaryOn) {
+    // salary counts as income, remaining are categories
+    const catCount = Math.min(numCategories - 1, 3); // 1, 2, or 3 additional cats
+    rate = rateTable[txnTier - 1][catCount - 1];
+  }
+
+  const totalInterest = balance * rate;
+  const effectiveRate = rate;
+
+  const results = $('dbs-results');
+  results.innerHTML = `
+    <h3>Results</h3>
+    <div class="result-row"><span>Categories: Salary${ccOn ? ' + CC/PayLah!' : ''}${investOn ? ' + Invest' : ''}${insuranceOn ? ' + Insurance' : ''}</span><span class="result-value">${numCategories >= 2 ? `Income + ${Math.min(numCategories-1,3)} Cat` : 'Need Salary + 1 more'}</span></div>
+    <div class="result-row"><span>Transaction Tier</span><span class="result-value">Tier ${txnTier}</span></div>
+    <div class="result-row"><span>Interest Rate</span><span class="result-value">${fmtP(rate)}</span></div>
+    <div class="result-row"><span><strong>Total Interest p.a.</strong></span><span class="result-value"><strong>${fmtD(totalInterest)}</strong></span></div>
+    <div class="result-row"><span><strong>Effective Interest Rate</strong></span><span class="result-value"><strong>${fmtP(effectiveRate)}</strong></span></div>
+    <div class="result-row"><span>Total Interest p.m.</span><span class="result-value">${fmtD(totalInterest / 12)}</span></div>
+  `;
+
+  return { balance, interestPA: totalInterest };
+}
+
+// ==================== SC Bonus $aver Calculation ====================
+function calcSCBonus() {
+  const balance = Math.min(num('sc-balance'), 100000);
+  const salaryOn = checked('sc-salary') ? 1 : 0;
+  const ccOn = checked('sc-cc') ? 1 : 0;
+  const investOn = checked('sc-invest') ? 1 : 0;
+  const investAmt = num('sc-invest-amt');
+  const investReturn = num('sc-invest-return') / 100;
+
+  const salaryRate = 0.009;
+  const ccRate = 0.009;
+  const investRate = 0.015;
+
+  let totalRate = 0;
+  if (salaryOn) totalRate += salaryRate;
+  if (ccOn) totalRate += ccRate;
+  if (investOn) totalRate += investRate;
+
+  const totalInterest = balance * totalRate;
+  const effectiveRate = totalRate;
+
+  // Investment return
+  const investReturnPA = investOn ? investAmt * investReturn : 0;
+  const totalReturnPA = totalInterest + investReturnPA;
+  const totalReturnRate = (balance + (investOn ? investAmt : 0)) > 0
+    ? totalReturnPA / (balance + (investOn ? investAmt : 0)) : 0;
+
+  const results = $('sc-results');
+  results.innerHTML = `
+    <h3>Results</h3>
+    <div class="result-row"><span>Salary Interest (${fmtP(salaryRate)}) ${salaryOn ? '✓' : '✗'}</span><span class="result-value">${fmtD(salaryOn ? balance * salaryRate : 0)}</span></div>
+    <div class="result-row"><span>CC Spend Interest (${fmtP(ccRate)}) ${ccOn ? '✓' : '✗'}</span><span class="result-value">${fmtD(ccOn ? balance * ccRate : 0)}</span></div>
+    <div class="result-row"><span>Invest Interest (${fmtP(investRate)}) ${investOn ? '✓' : '✗'}</span><span class="result-value">${fmtD(investOn ? balance * investRate : 0)}</span></div>
+    <div class="result-row" style="border-top:2px solid var(--border);padding-top:8px"><span><strong>Total Interest p.a.</strong></span><span class="result-value"><strong>${fmtD(totalInterest)}</strong></span></div>
+    <div class="result-row"><span><strong>Effective Interest Rate</strong></span><span class="result-value"><strong>${fmtP(effectiveRate)}</strong></span></div>
+    <div class="result-row"><span>Total Interest p.m.</span><span class="result-value">${fmtD(totalInterest / 12)}</span></div>
+    ${investOn ? `
+    <div class="result-row" style="border-top:2px solid var(--border);padding-top:8px"><span>Investment Return p.a. (@ ${fmtP(investReturn)})</span><span class="result-value">${fmtD(investReturnPA)}</span></div>
+    <div class="result-row"><span><strong>Total Return (Savings + Invest) p.a.</strong></span><span class="result-value"><strong>${fmtD(totalReturnPA)}</strong></span></div>
+    <div class="result-row"><span>Combined Return Rate</span><span class="result-value">${fmtP(totalReturnRate)}</span></div>
+    ` : ''}
+  `;
+
+  return { balance, interestPA: totalInterest, investAmt: investOn ? investAmt : 0, investReturnPA };
+}
+
+// ==================== POSB SAYE Calculation ====================
+function calcPOSBSaye() {
+  const monthlySave = num('saye-monthly');
+  const baseRate = num('saye-base-rate') / 100;
+  const bonusRate = num('saye-bonus-rate') / 100;
+
+  // Generate 48 months from Jan 2025 to Dec 2028
+  const rows = [];
+  let cumulativeSavings = 0;
+  let cumulativeInterest = 0;
+
+  for (let i = 0; i < 48; i++) {
+    const year = 2025 + Math.floor(i / 12);
+    const month = (i % 12) + 1;
+    const date = new Date(year, month - 1, 1);
+    const daysInMonth = new Date(year, month, 0).getDate();
+
+    cumulativeSavings += monthlySave;
+
+    const baseInterest = cumulativeSavings * baseRate / 365 * daysInMonth;
+    const bonusInterest = cumulativeSavings * bonusRate / 365 * daysInMonth;
+    const subInterest = baseInterest + bonusInterest;
+    cumulativeInterest += subInterest;
+
+    const isYearEnd = month === 12;
+
+    rows.push({
+      date, year, month, daysInMonth,
+      cashflow: monthlySave,
+      cumulativeSavings,
+      baseInterest, bonusInterest, subInterest,
+      cumulativeInterest,
+      isYearEnd,
+      simpleReturn: isYearEnd ? cumulativeInterest / cumulativeSavings : null,
+    });
+  }
+
+  // XIRR calculation
+  const cashflows = [];
+  const dates = [];
+  for (const row of rows) {
+    cashflows.push(row.cashflow);
+    dates.push(row.date);
+  }
+  // Final withdrawal
+  const finalDate = new Date(rows[rows.length - 1].date);
+  finalDate.setDate(finalDate.getDate() + 1);
+  cashflows.push(-(cumulativeSavings + cumulativeInterest));
+  dates.push(finalDate);
+
+  const xirr = calcXIRR(cashflows, dates);
+
+  // Year-end summaries
+  const yearEndRows = rows.filter(r => r.isYearEnd);
+
+  const results = $('saye-results');
+  results.innerHTML = `
+    <h3>Summary</h3>
+    <div class="result-row"><span>Monthly Savings</span><span class="result-value">${fmtD(monthlySave)}</span></div>
+    <div class="result-row"><span>Total Savings (48 months)</span><span class="result-value">${fmtD(cumulativeSavings)}</span></div>
+    <div class="result-row"><span>Total Interest Earned</span><span class="result-value">${fmtD(cumulativeInterest)}</span></div>
+    <div class="result-row"><span>Simple Return</span><span class="result-value">${fmtP(cumulativeInterest / cumulativeSavings, 4)}</span></div>
+    <div class="result-row"><span><strong>XIRR (Annualized Return)</strong></span><span class="result-value"><strong>${xirr !== null ? fmtP(xirr, 4) : 'N/A'}</strong></span></div>
+    ${yearEndRows.map(r => `
+    <div class="result-row"><span>Year ${r.year} — Cumulative Interest</span><span class="result-value">${fmtD(r.cumulativeInterest)} (${fmtP(r.simpleReturn, 4)})</span></div>
+    `).join('')}
+  `;
+
+  // Detailed table
+  let tableHTML = `<div class="section-divider"></div>
+    <div class="section-title">Monthly Breakdown</div>
+    <table class="saye-table">
+    <tr><th>Date</th><th>Monthly Save</th><th>Cumulated Savings</th><th>Base ${fmtP(baseRate)}</th><th>Bonus ${fmtP(bonusRate)}</th><th>Sub Interest</th><th>Cumul. Interest</th><th>Return %</th></tr>`;
+
+  for (const row of rows) {
+    const cls = row.isYearEnd ? ' class="year-end"' : '';
+    const dateStr = `${row.year}-${String(row.month).padStart(2,'0')}`;
+    tableHTML += `<tr${cls}>
+      <td style="text-align:left">${dateStr}</td>
+      <td>${fmtD(row.cashflow)}</td>
+      <td>${fmtD(row.cumulativeSavings)}</td>
+      <td>${fmtD(row.baseInterest)}</td>
+      <td>${fmtD(row.bonusInterest)}</td>
+      <td>${fmtD(row.subInterest)}</td>
+      <td>${row.isYearEnd ? fmtD(row.cumulativeInterest) : ''}</td>
+      <td>${row.isYearEnd ? fmtP(row.simpleReturn, 4) : ''}</td>
+    </tr>`;
+  }
+  tableHTML += '</table>';
+  $('saye-table-container').innerHTML = tableHTML;
+}
+
+// ==================== XIRR Newton's Method ====================
+function calcXIRR(cashflows, dates) {
+  // Convert dates to year fractions from first date
+  const d0 = dates[0].getTime();
+  const yearFracs = dates.map(d => (d.getTime() - d0) / (365.25 * 24 * 3600 * 1000));
+
+  function npv(rate) {
+    return cashflows.reduce((sum, cf, i) => sum + cf / Math.pow(1 + rate, yearFracs[i]), 0);
+  }
+  function dnpv(rate) {
+    return cashflows.reduce((sum, cf, i) => sum - yearFracs[i] * cf / Math.pow(1 + rate, yearFracs[i] + 1), 0);
+  }
+
+  let guess = 0.1;
+  for (let iter = 0; iter < 200; iter++) {
+    const f = npv(guess);
+    const df = dnpv(guess);
+    if (Math.abs(df) < 1e-15) break;
+    const newGuess = guess - f / df;
+    if (Math.abs(newGuess - guess) < 1e-10) return newGuess;
+    guess = newGuess;
+  }
+  return Math.abs(npv(guess)) < 0.01 ? guess : null;
+}
+
+// ==================== Summary Update ====================
+function updateAll() {
+  const uob1 = calcUOBOne();
+  const uobs = calcUOBStash();
+  const ocbc = calcOCBC360();
+  const dbs = calcDBSMulti();
+  const sc = calcSCBonus();
+
+  const totalBalance = uob1.balance + uobs.balance + ocbc.balance + dbs.balance + sc.balance
+    + (ocbc.investAmt || 0) + (sc.investAmt || 0);
+  const totalInterest = uob1.interestPA + uobs.interestPA + ocbc.interestPA + dbs.interestPA + sc.interestPA
+    + (ocbc.investReturnPA || 0) + (sc.investReturnPA || 0);
+  const effectiveRate = totalBalance > 0 ? totalInterest / totalBalance : 0;
+
+  $('sum-total-balance').textContent = fmtD(totalBalance);
+  $('sum-total-interest-pa').textContent = fmtD(totalInterest);
+  $('sum-effective-rate').textContent = fmtP(effectiveRate);
+  $('sum-total-interest-pm').textContent = fmtD(totalInterest / 12);
+}
+
+// ==================== Tab Switching ====================
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab).classList.add('active');
+
+    // Lazy calculate POSB SAYE only when its tab is shown
+    if (tab.dataset.tab === 'posb-saye') calcPOSBSaye();
+  });
+});
+
+// ==================== Event Listeners ====================
+const allInputs = document.querySelectorAll('input, select');
+allInputs.forEach(input => {
+  input.addEventListener('input', updateAll);
+  input.addEventListener('change', updateAll);
+});
+
+// SAYE-specific listeners
+['saye-monthly', 'saye-base-rate', 'saye-bonus-rate'].forEach(id => {
+  $(id).addEventListener('input', calcPOSBSaye);
+});
+
+// Initial calculation
+updateAll();
+</script>
+</body>
+</html>
