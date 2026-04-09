@@ -34,8 +34,9 @@
   .summary-card .sub { font-size: 0.8rem; color: var(--text-muted); }
 
   /* Tabs */
-  .tabs { display: flex; gap: 4px; border-bottom: 2px solid var(--border); margin-bottom: 0; overflow-x: auto; flex-wrap: nowrap; }
-  .tab { padding: 10px 18px; cursor: pointer; border: none; background: none; font-size: 0.9rem; font-weight: 500; color: var(--text-muted); border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap; }
+  .tabs { display: flex; gap: 4px; border-bottom: 2px solid var(--border); margin-bottom: 0; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { padding: 10px 18px; cursor: pointer; border: none; background: none; font-size: 0.9rem; font-weight: 500; color: var(--text-muted); border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
   .tab:hover { color: var(--text); }
   .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
@@ -77,28 +78,54 @@
   /* Results */
   .results { background: #f7fafc; border-radius: 8px; padding: 16px; margin-top: 16px; }
   .results h3 { font-size: 1rem; margin-bottom: 10px; color: var(--text); }
-  .result-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  .result-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; gap: 8px; flex-wrap: wrap; }
   .result-row:last-child { border-bottom: none; }
-  .result-value { font-weight: 600; color: var(--accent); }
+  .result-value { font-weight: 600; color: var(--accent); text-align: right; }
 
   /* Reference Tables */
-  .ref-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 12px; }
-  .ref-table th, .ref-table td { padding: 6px 10px; border: 1px solid var(--border); text-align: center; }
+  .table-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 12px; }
+  .ref-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .ref-table th, .ref-table td { padding: 6px 10px; border: 1px solid var(--border); text-align: center; white-space: nowrap; }
   .ref-table th { background: #edf2f7; font-weight: 600; }
   .ref-table .highlight { background: #fffff0; }
 
   /* POSB SAYE Table */
-  .saye-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 12px; }
-  .saye-table th, .saye-table td { padding: 4px 8px; border: 1px solid var(--border); text-align: right; }
+  .saye-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+  .saye-table th, .saye-table td { padding: 4px 8px; border: 1px solid var(--border); text-align: right; white-space: nowrap; }
   .saye-table th { background: #edf2f7; font-weight: 600; text-align: center; }
   .saye-table .year-end { background: #fffff0; font-weight: 600; }
 
   /* Responsive */
   @media (max-width: 768px) {
-    .input-row { flex-direction: column; align-items: flex-start; gap: 4px; }
+    .container { padding: 10px; }
+    h1 { font-size: 1.2rem; }
+    .subtitle { font-size: 0.8rem; }
+    .summary { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .summary-card { padding: 12px 8px; }
+    .summary-card .value { font-size: 1.2rem; }
+    .summary-card .label { font-size: 0.7rem; }
+    .tab { padding: 10px 14px; font-size: 0.8rem; min-width: 0; }
+    .tab-content { padding: 14px; border-radius: 0 0 8px 8px; }
+    .bank-name { font-size: 1.1rem; }
+    .input-row { flex-direction: column; align-items: stretch; gap: 6px; padding: 10px 0; }
+    .input-label { min-width: unset; font-size: 0.88rem; }
     .input-field { width: 100%; }
-    .tab { padding: 8px 12px; font-size: 0.8rem; }
-    .summary { grid-template-columns: repeat(2, 1fr); }
+    .input-field input[type="number"] { font-size: 16px; padding: 10px 12px; }
+    select { font-size: 16px; width: 100%; padding: 10px 12px; }
+    .toggle { width: 52px; height: 28px; }
+    .toggle .slider:before { height: 22px; width: 22px; }
+    .input-note { font-size: 0.75rem; }
+    .result-row { font-size: 0.85rem; gap: 4px; }
+    .results { padding: 12px; }
+    .ref-table th, .ref-table td { padding: 5px 6px; font-size: 0.75rem; }
+    .saye-table th, .saye-table td { padding: 3px 5px; font-size: 0.7rem; }
+    .section-title { font-size: 0.9rem; }
+    footer { padding: 16px; font-size: 0.75rem; }
+  }
+  @media (max-width: 380px) {
+    .summary { grid-template-columns: 1fr; }
+    .summary-card .value { font-size: 1.1rem; }
+    .tab { padding: 8px 10px; font-size: 0.75rem; }
   }
 
   select {
@@ -196,7 +223,7 @@
 
     <div class="section-divider"></div>
     <div class="section-title">Interest Rate Tiers (Reference)</div>
-    <table class="ref-table">
+    <div class="table-scroll"><table class="ref-table">
       <tr><th></th><th>Balance Tier</th><th>Total</th><th>Spend 500</th><th>Spend 500 + 3 Giro</th><th>Spend 500 + Salary</th></tr>
       <tr><td>1st</td><td>$30,000</td><td>$30,000</td><td>0.65%</td><td>1.00%</td><td>1.00%</td></tr>
       <tr><td>Next</td><td>$30,000</td><td>$60,000</td><td>0.65%</td><td>1.00%</td><td>1.00%</td></tr>
@@ -205,15 +232,15 @@
       <tr><td>Next</td><td>$25,000</td><td>$125,000</td><td>0.05%</td><td>2.00%</td><td>2.50%</td></tr>
       <tr><td>Next</td><td>$25,000</td><td>$150,000</td><td>0.05%</td><td>0.05%</td><td>3.40%</td></tr>
       <tr><td>Above</td><td>$150,000+</td><td>-</td><td>0.05%</td><td>0.05%</td><td>0.05%</td></tr>
-    </table>
+    </table></div>
 
     <div class="section-title" style="margin-top:12px">Tax Rebate Tiers</div>
-    <table class="ref-table">
+    <div class="table-scroll"><table class="ref-table">
       <tr><th>MAB Range</th><th>Tier 1 Rate</th><th>Tier 2 Rate</th><th>Monthly Cap</th></tr>
       <tr><td>$30,000 - $74,999</td><td>6%</td><td>6.50%</td><td>$10</td></tr>
       <tr><td>$75,000 - $149,999</td><td>6%</td><td>6.50%</td><td>$25</td></tr>
       <tr><td>$150,000+</td><td>6%</td><td>6.50%</td><td>$50</td></tr>
-    </table>
+    </table></div>
   </div>
 
   <!-- ==================== UOB Stash ==================== -->
@@ -241,14 +268,14 @@
 
     <div class="section-divider"></div>
     <div class="section-title">Interest Rate Tiers (Reference)</div>
-    <table class="ref-table">
+    <div class="table-scroll"><table class="ref-table">
       <tr><th></th><th>Balance Tier</th><th>Total</th><th>Rate (MAB increase)</th></tr>
       <tr><td>1st</td><td>$10,000</td><td>$10,000</td><td>0.05%</td></tr>
       <tr><td>Next</td><td>$30,000</td><td>$40,000</td><td>1.40%</td></tr>
       <tr><td>Next</td><td>$30,000</td><td>$70,000</td><td>1.60%</td></tr>
       <tr><td>Next</td><td>$30,000</td><td>$100,000</td><td>2.00%</td></tr>
       <tr><td>Above</td><td>$100,000+</td><td>-</td><td>0.05%</td></tr>
-    </table>
+    </table></div>
   </div>
 
   <!-- ==================== OCBC 360 ==================== -->
@@ -296,11 +323,11 @@
 
     <div class="section-divider"></div>
     <div class="section-title">Interest Rate Tiers (Reference)</div>
-    <table class="ref-table">
+    <div class="table-scroll"><table class="ref-table">
       <tr><th></th><th>Balance Tier</th><th>Total</th><th>Salary</th><th>Save $500</th><th>Spend $500</th><th>Invest</th></tr>
       <tr><td>1st $75k</td><td>$75,000</td><td>$75,000</td><td>1.00%</td><td>0.40%</td><td>0.25%</td><td>1.20%</td></tr>
       <tr><td>Next $25k</td><td>$25,000</td><td>$100,000</td><td>2.00%</td><td>0.40%</td><td>0.25%</td><td>2.00%</td></tr>
-    </table>
+    </table></div>
   </div>
 
   <!-- ==================== DBS Multiplier ==================== -->
@@ -349,12 +376,12 @@
 
     <div class="section-divider"></div>
     <div class="section-title">Interest Rate Tiers (Reference)</div>
-    <table class="ref-table">
+    <div class="table-scroll"><table class="ref-table">
       <tr><th>Txn Tier</th><th>Eligible Transaction</th><th>Income + 1 Cat</th><th>Income + 2 Cat</th><th>Income + 3 Cat</th></tr>
       <tr><td>1</td><td>$500 - $15,000</td><td>1.80%</td><td>2.10%</td><td>2.40%</td></tr>
       <tr><td>2</td><td>$15,000 - $30,000</td><td>1.90%</td><td>2.20%</td><td>2.50%</td></tr>
       <tr><td>3</td><td>$30,000+</td><td>2.20%</td><td>3.00%</td><td>4.10%</td></tr>
-    </table>
+    </table></div>
   </div>
 
   <!-- ==================== SC Bonus $aver ==================== -->
@@ -405,12 +432,12 @@
 
     <div class="section-divider"></div>
     <div class="section-title">Interest Rates</div>
-    <table class="ref-table">
+    <div class="table-scroll"><table class="ref-table">
       <tr><th>Category</th><th>Interest p.a.</th></tr>
       <tr><td>Salary Credit $3,000</td><td>0.90%</td></tr>
       <tr><td>DC/CC Spend $1,000</td><td>0.90%</td></tr>
       <tr><td>Invest $30,000 (6 months)</td><td>1.50%</td></tr>
-    </table>
+    </table></div>
   </div>
 
   <!-- ==================== POSB SAYE ==================== -->
@@ -831,7 +858,7 @@ function calcPOSBSaye() {
   // Detailed table
   let tableHTML = `<div class="section-divider"></div>
     <div class="section-title">Monthly Breakdown</div>
-    <table class="saye-table">
+    <div class="table-scroll"><table class="saye-table">
     <tr><th>Date</th><th>Monthly Save</th><th>Cumulated Savings</th><th>Base ${fmtP(baseRate)}</th><th>Bonus ${fmtP(bonusRate)}</th><th>Sub Interest</th><th>Cumul. Interest</th><th>Return %</th></tr>`;
 
   for (const row of rows) {
@@ -848,7 +875,7 @@ function calcPOSBSaye() {
       <td>${row.isYearEnd ? fmtP(row.simpleReturn, 4) : ''}</td>
     </tr>`;
   }
-  tableHTML += '</table>';
+  tableHTML += '</table></div>';
   $('saye-table-container').innerHTML = tableHTML;
 }
 
