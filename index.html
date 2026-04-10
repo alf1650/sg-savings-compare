@@ -12,6 +12,7 @@
     --sc-color: #0072AA;
     --posb-color: #D40000;
     --hsbc-color: #DB0011;
+    --gxs-color: #00836F;
     --bg: #f5f7fa;
     --card-bg: #fff;
     --text: #2d3748;
@@ -181,6 +182,7 @@
     <button class="tab" data-tab="posb-saye">POSB SAYE</button>
     <button class="tab" data-tab="hsbc-ega">HSBC EGA</button>
     <button class="tab" data-tab="ocbc-premier">OCBC Premier Div+</button>
+    <button class="tab" data-tab="gxs">GXS Bank</button>
   </div>
 
   <!-- Bank Selector (mobile) -->
@@ -194,6 +196,7 @@
       <option value="posb-saye">POSB SAYE</option>
       <option value="hsbc-ega">HSBC EGA</option>
       <option value="ocbc-premier">OCBC Premier Div+</option>
+      <option value="gxs">GXS Bank</option>
     </select>
   </div>
 
@@ -605,6 +608,55 @@
       OCBC Premier Banking customers only. Initial deposit of at least $50,000 in fresh funds required.
       See <a href="https://www.ocbc.com/premier-banking/our-solutions/deposits/premier-dividend-plus-savings" target="_blank">OCBC website</a> for full details.
     </div>
+  </div>
+
+  <!-- ==================== GXS Bank ==================== -->
+  <div class="tab-content" id="gxs">
+    <div class="bank-header">
+      <div>
+        <div class="bank-name" style="color:var(--gxs-color)">GXS Bank</div>
+        <div class="bank-note">Digital bank · No minimum balance · No fees</div>
+      </div>
+    </div>
+
+    <div class="input-section">
+      <div class="input-row">
+        <span class="input-label">Balance</span>
+        <div class="input-field"><input type="number" id="gxs-balance" value="75000" min="0" step="1000"></div>
+      </div>
+      <div class="input-row">
+        <span class="input-label">Account Type</span>
+        <select id="gxs-account-type">
+          <option value="main">Main Account (0.88%)</option>
+          <option value="pockets" selected>Saving Pockets (1.08%)</option>
+          <option value="boost">Boost Pocket (up to 1.30%)</option>
+        </select>
+      </div>
+      <div class="input-row" id="gxs-tenure-row">
+        <span class="input-label">Boost Pocket Tenure</span>
+        <select id="gxs-tenure">
+          <option value="1">1 month (0.88% + 0.13% = 1.01% p.a.)</option>
+          <option value="3">3 months (0.88% + 0.34% = 1.22% p.a.)</option>
+          <option value="8" selected>8 months (0.88% + 0.42% = 1.30% p.a.)</option>
+          <option value="12">12 months (0.88% + 0.42% = 1.30% p.a.)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="results" id="gxs-results"></div>
+
+    <div class="section-divider"></div>
+    <div class="section-title">Interest Rates (Reference)</div>
+    <div class="table-scroll"><table class="ref-table">
+      <tr><th>Account Type</th><th>Rate p.a.</th><th>Notes</th></tr>
+      <tr><td>Main Account</td><td>0.88%</td><td>Interest credited daily. Links to Grab/Dash.</td></tr>
+      <tr><td>Saving Pockets (up to 8)</td><td>1.08%</td><td>Interest credited daily. No hoops, no lock-in.</td></tr>
+      <tr><th colspan="3" style="text-align:left;background:#edf2f7">Boost Pocket — 0.88% base (daily) + bonus at maturity</th></tr>
+      <tr><td>1-month tenure</td><td>0.88% + 0.13% = <strong>1.01%</strong></td><td rowspan="4">Up to 5 Boost Pockets. Bonus credited at maturity.</td></tr>
+      <tr><td>3-month tenure</td><td>0.88% + 0.34% = <strong>1.22%</strong></td></tr>
+      <tr><td>8-month tenure</td><td>0.88% + 0.42% = <strong>1.30%</strong></td></tr>
+      <tr><td>12-month tenure</td><td>0.88% + 0.42% = <strong>1.30%</strong></td></tr>
+    </table></div>
   </div>
 
 </div>
@@ -1160,6 +1212,50 @@ function calcPOSBSaye() {
   $('saye-table-container').innerHTML = tableHTML;
 }
 
+// ==================== GXS Bank Calculation ====================
+function calcGXS() {
+  const balance = num('gxs-balance');
+  const accountType = $('gxs-account-type').value;
+  const tenure = parseInt($('gxs-tenure').value);
+
+  // Show/hide tenure row
+  $('gxs-tenure-row').style.display = accountType === 'boost' ? '' : 'none';
+
+  const baseRate = 0.0088;
+  const boostBonusMap = { 1: 0.0013, 3: 0.0034, 8: 0.0042, 12: 0.0042 };
+
+  let rate, label, bonusNote = '';
+  if (accountType === 'main') {
+    rate = 0.0088;
+    label = 'Main Account';
+  } else if (accountType === 'pockets') {
+    rate = 0.0108;
+    label = 'Saving Pockets';
+  } else {
+    const bonus = boostBonusMap[tenure];
+    rate = baseRate + bonus;
+    label = `Boost Pocket (${tenure}-month)`;
+    bonusNote = `<div class="result-row"><span>Base Interest (daily)</span><span class="result-value">${fmtP(baseRate)}</span></div>
+    <div class="result-row"><span>Bonus at Maturity</span><span class="result-value">${fmtP(bonus)}</span></div>`;
+  }
+
+  const totalInterest = balance * rate;
+  const effectiveRate = balance > 0 ? rate : 0;
+
+  const results = $('gxs-results');
+  results.innerHTML = `
+    <h3>Results</h3>
+    <div class="result-row"><span>Account Type</span><span class="result-value">${label}</span></div>
+    <div class="result-row"><span>Balance</span><span class="result-value">${fmtD(balance)}</span></div>
+    ${bonusNote}
+    <div class="result-row"><span><strong>Total Interest p.a.</strong></span><span class="result-value"><strong>${fmtD(totalInterest)}</strong></span></div>
+    <div class="result-row"><span><strong>Effective Interest Rate</strong></span><span class="result-value"><strong>${fmtP(effectiveRate)}</strong></span></div>
+    <div class="result-row"><span>Total Interest p.m.</span><span class="result-value">${fmtD(totalInterest / 12)}</span></div>
+  `;
+
+  return { balance, interestPA: totalInterest };
+}
+
 // ==================== XIRR Newton's Method ====================
 function calcXIRR(cashflows, dates) {
   // Convert dates to year fractions from first date
@@ -1194,11 +1290,12 @@ function updateAll() {
   const sc = calcSCBonus();
   const hsbc = calcHSBCEGA();
   const ocbcp = calcOCBCPremier();
+  const gxs = calcGXS();
 
   const totalBalance = uob1.balance + uobs.balance + ocbc.balance + dbs.balance + sc.balance
-    + (ocbc.investAmt || 0) + (sc.investAmt || 0) + hsbc.balance + ocbcp.balance;
+    + (ocbc.investAmt || 0) + (sc.investAmt || 0) + hsbc.balance + ocbcp.balance + gxs.balance;
   const totalInterest = uob1.interestPA + uobs.interestPA + ocbc.interestPA + dbs.interestPA + sc.interestPA
-    + (ocbc.investReturnPA || 0) + (sc.investReturnPA || 0) + hsbc.interestPA + ocbcp.interestPA;
+    + (ocbc.investReturnPA || 0) + (sc.investReturnPA || 0) + hsbc.interestPA + ocbcp.interestPA + gxs.interestPA;
   const effectiveRate = totalBalance > 0 ? totalInterest / totalBalance : 0;
 
   $('sum-total-balance').textContent = fmtD(totalBalance);
@@ -1248,6 +1345,10 @@ allInputs.forEach(input => {
   $(id).addEventListener('input', calcOCBCPremier);
   $(id).addEventListener('change', calcOCBCPremier);
 });
+
+// GXS account type toggle — show/hide tenure row
+$('gxs-account-type').addEventListener('change', updateAll);
+$('gxs-tenure').addEventListener('change', updateAll);
 
 // Initial calculation
 updateAll();
