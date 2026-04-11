@@ -543,11 +543,11 @@
     <div class="table-scroll"><table class="ref-table">
       <tr><th>Component</th><th>Rate p.a.</th><th>Applies To</th><th>Requirement</th></tr>
       <tr><td>Base Interest</td><td>0.05%</td><td>All balances</td><td>—</td></tr>
-      <tr><td>Everyday+ Bonus</td><td>1.00%</td><td>Existing balance</td><td>Deposit ≥$2,000 &amp; ≥5 eligible debit card txns/month</td></tr>
+      <tr><td>Everyday+ Bonus</td><td>1.00%</td><td>All balances (incl. fresh funds)</td><td>Deposit ≥$2,000 &amp; ≥5 eligible debit card txns/month</td></tr>
       <tr><td colspan="4" style="background:#edf2f7;font-weight:600;text-align:left;padding:6px 10px">April 2026 Promotional Bonus (on Incremental Fresh Funds, 1 Apr–31 Jul 2026)</td></tr>
       <tr><td>Promo — With wealth holdings</td><td>1.75% bonus</td><td>Fresh funds (≤$5M)</td><td rowspan="2">Register via SMS to 74722 or App by 30 Apr 2026</td></tr>
       <tr><td>Promo — Without wealth holdings</td><td>1.60% bonus</td><td>Fresh funds (≤$5M)</td></tr>
-      <tr><td><strong>Max Total (wealth, promo)</strong></td><td><strong>1.80%</strong></td><td>Fresh funds</td><td>0.05% base + 1.75% promo</td></tr>
+      <tr><td><strong>Max Total (wealth, promo + Everyday+)</strong></td><td><strong>2.80%</strong></td><td>Fresh funds</td><td>0.05% base + 1.75% promo + 1.00% Everyday+</td></tr>
     </table></div>
     <div class="note-box" style="margin-top:12px">
       <strong>SMS Registration:</strong> Send <code>EGA &lt;space&gt; First 9 digits of your EGA number</code> to <strong>74722</strong> by 30 April 2026. Or register via the HSBC Singapore app.<br>
@@ -994,14 +994,19 @@ function calcHSBCEGA() {
   const existingRate = baseRate + (everydayPlus ? everydayBonusRate : 0);
   const existingInterest = balance * existingRate;
 
-  // Fresh funds interest (promotional rate applies, replaces base if promo active)
-  const freshInterest = smsPromo ? freshFunds * promoTotalRate : freshFunds * baseRate;
+  // Fresh funds interest: promo rate + Everyday+ bonus (if qualified) applies to fresh funds too
+  let freshRate = smsPromo ? promoTotalRate : baseRate;
+  if (everydayPlus) freshRate += everydayBonusRate;
+  const freshInterest = freshFunds * freshRate;
 
   const totalInterest = existingInterest + freshInterest;
   const totalBalance = balance + freshFunds;
   const effectiveRate = totalBalance > 0 ? totalInterest / totalBalance : 0;
 
-  const promoLabel = customerType === 'wealth' ? '1.80% (wealth)' : '1.65% (standard)';
+  const promoLabel = customerType === 'wealth' ? '1.80%' : '1.65%';
+  const freshLabel = smsPromo
+    ? `${promoLabel} promo${everydayPlus ? ' + 1.00% Everyday+' : ''} = ${fmtP(freshRate)}`
+    : `0.05% base${everydayPlus ? ' + 1.00% Everyday+' : ''}`;
 
   const results = $('hsbc-results');
   results.innerHTML = `
@@ -1010,7 +1015,7 @@ function calcHSBCEGA() {
     <div class="result-row"><span>Everyday+ Bonus (1.00%) ${everydayPlus ? '✓' : '✗'}</span><span class="result-value">${fmtD(everydayPlus ? balance * everydayBonusRate : 0)}</span></div>
     <div class="result-row"><span>Existing Balance Interest p.a.</span><span class="result-value">${fmtD(existingInterest)} (${fmtP(existingRate)})</span></div>
     <h3 style="margin-top:10px">April 2026 Promo — Fresh Funds</h3>
-    <div class="result-row"><span>Promo Rate ${smsPromo ? `(${promoLabel})` : '(not registered)'}</span><span class="result-value">${smsPromo ? promoLabel : '0.05%'}</span></div>
+    <div class="result-row"><span>Fresh Funds Rate</span><span class="result-value">${freshLabel}</span></div>
     <div class="result-row"><span>Fresh Funds Interest p.a.</span><span class="result-value">${fmtD(freshInterest)}</span></div>
     <div class="result-row" style="border-top:2px solid var(--border);padding-top:8px"><span><strong>Total Interest p.a.</strong></span><span class="result-value"><strong>${fmtD(totalInterest)}</strong></span></div>
     <div class="result-row"><span><strong>Blended Effective Rate</strong></span><span class="result-value"><strong>${fmtP(effectiveRate)}</strong></span></div>

@@ -7,6 +7,9 @@ A web-based calculator comparing savings account interest rates across Singapore
 - **DBS Multiplier** — transaction tier-based rates
 - **SC Bonus $aver** — simple category-based rates
 - **POSB SAYE** — monthly savings plan with XIRR calculation
+- **HSBC Everyday Global Account** — Everyday+ bonus + incremental fresh funds promo (Apr–Jul 2026)
+- **OCBC Premier Dividend+** — monthly savings projection with no-withdraw & save bonuses
+- **GXS Bank** — digital bank with main account, saving pockets & boost pockets
 
 ## How to Use
 
