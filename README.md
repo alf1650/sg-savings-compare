@@ -1,6 +1,6 @@
 # Singapore Banks Savings Interest Comparison
 
-A web-based calculator comparing savings account interest rates across Singapore banks:
+A single-page web calculator comparing savings account interest rates across 9 Singapore banks:
 - **UOB One** — tiered rates with CC spend, GIRO, salary credit + tax rebate
 - **UOB Stash** — tiered rates with MAB increase requirement
 - **OCBC 360** — salary, save, spend, invest categories
@@ -11,29 +11,29 @@ A web-based calculator comparing savings account interest rates across Singapore
 - **OCBC Premier Dividend+** — monthly savings projection with no-withdraw & save bonuses
 - **GXS Bank** — digital bank with main account, saving pockets & boost pockets
 
+## Features
+
+- Real-time interest calculation as you adjust inputs
+- Summary cards showing best effective rate across all banks
+- Toggle switches for qualifying criteria (salary credit, card spend, etc.)
+- Tier breakdown tables for each bank
+- XIRR calculation for POSB SAYE
+- Mobile-responsive with dropdown bank selector on small screens
+- Fully client-side — no server, no dependencies, single HTML file
+
 ## How to Use
 
 Simply open `index.html` in any browser. All calculations run client-side — no server needed.
 
-## Free Hosting Options
+## Hosting
 
-### Option 1: GitHub Pages (Recommended)
-1. Create a GitHub account at https://github.com
-2. Create a new repository (e.g., `sg-savings-compare`)
-3. Upload `index.html` to the repository
-4. Go to Settings → Pages → Source: "Deploy from a branch" → Branch: `main` → Save
-5. Your site will be live at `https://yourusername.github.io/sg-savings-compare/`
+### GitHub Pages (Recommended)
+1. Push to a GitHub repo
+2. Settings → Pages → Deploy from `main` branch
+3. Live at `https://yourusername.github.io/sg-savings-compare/`
 
-### Option 2: Netlify Drop (Easiest)
-1. Go to https://app.netlify.com/drop
-2. Drag and drop the `sg-savings-compare` folder
-3. Your site is instantly live with a random URL
-4. Create a free account to keep it permanently and get a custom subdomain
-
-### Option 3: Cloudflare Pages
-1. Go to https://pages.cloudflare.com
-2. Connect your GitHub repo or upload directly
-3. Free custom domain support included
+### Netlify Drop (Easiest)
+1. Drag and drop the folder at [app.netlify.com/drop](https://app.netlify.com/drop)
 
 ## Data Source
 
