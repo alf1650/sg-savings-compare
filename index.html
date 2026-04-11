@@ -145,12 +145,36 @@
   .section-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 8px; color: var(--text); }
   .note-box { background: #fffff0; border: 1px solid #ecc94b; border-radius: 6px; padding: 10px; font-size: 0.8rem; color: #744210; margin-bottom: 12px; }
   footer { text-align: center; padding: 24px; color: var(--text-muted); font-size: 0.8rem; }
+
+  /* Connectivity status indicator */
+  .connectivity-status {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.78rem; font-weight: 500;
+    padding: 4px 10px; border-radius: 20px; margin-top: 6px;
+    transition: background 0.3s, color 0.3s;
+  }
+  .connectivity-status.online { background: #c6f6d5; color: #276749; }
+  .connectivity-status.offline { background: #fed7d7; color: #9b2c2c; }
+  .connectivity-status.checking { background: #e2e8f0; color: var(--text-muted); }
+  .connectivity-status .dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+  .connectivity-status.online .dot { background: #38a169; }
+  .connectivity-status.offline .dot { background: #e53e3e; }
+  .connectivity-status.checking .dot { background: #a0aec0; }
+
+  .connectivity-container { text-align: center; margin-bottom: 12px; }
 </style>
 </head>
 <body>
 <div class="container">
   <h1>Singapore Banks Savings Interest Comparison</h1>
   <p class="subtitle">Effective from 1 May 2025 — Compare UOB One, UOB Stash, OCBC 360, DBS Multiplier, SC Bonus $aver & POSB SAYE</p>
+  <div class="connectivity-container">
+    <span id="connectivity-status" class="connectivity-status checking">
+      <span class="dot"></span><span id="connectivity-text">Checking connection…</span>
+    </span>
+  </div>
 
   <!-- Summary Dashboard -->
   <div class="summary">
@@ -1355,6 +1379,38 @@ $('gxs-tenure').addEventListener('change', updateAll);
 
 // Initial calculation
 updateAll();
+
+// ==================== Connectivity Check ====================
+function setConnectivityStatus(state) {
+  const el = $('connectivity-status');
+  const text = $('connectivity-text');
+  el.className = 'connectivity-status ' + state;
+  if (state === 'online') {
+    text.textContent = 'Internet access available';
+  } else if (state === 'offline') {
+    text.textContent = 'No internet access';
+  } else {
+    text.textContent = 'Checking connection\u2026';
+  }
+}
+
+async function checkConnectivity() {
+  if (!navigator.onLine) {
+    setConnectivityStatus('offline');
+    return;
+  }
+  setConnectivityStatus('checking');
+  try {
+    await fetch('https://www.gstatic.com/generate_204', { method: 'HEAD', mode: 'no-cors', cache: 'no-store' });
+    setConnectivityStatus('online');
+  } catch {
+    setConnectivityStatus('offline');
+  }
+}
+
+window.addEventListener('online', checkConnectivity);
+window.addEventListener('offline', () => setConnectivityStatus('offline'));
+checkConnectivity();
 </script>
 </body>
 </html>
